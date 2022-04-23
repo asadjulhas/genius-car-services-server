@@ -47,7 +47,7 @@ async function run() {
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = geniusCarCollection.deleteOne(query);
-      // res.send(result.deletedCount)
+      res.send(result)
       console.log(result);
       
     })
