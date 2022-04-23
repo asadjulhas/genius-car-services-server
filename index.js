@@ -5,7 +5,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb')
 ;
 const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 4000;
 
 // Middleware
 app.use(cors());
@@ -19,11 +19,21 @@ async function run() {
     await client.connect();
     const geniusCarCollection = client.db("geniusCar").collection("services");
 
+    // Get all services
     app.get('/services', async (req, res) => {
       const query = {};
       const cursor = geniusCarCollection.find(query);
       const services = await cursor.toArray();
       res.send(services)
+    })
+
+    // Get single services
+    app.get('/service/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)}
+      const service = await geniusCarCollection.findOne(query);
+      console.log(service);
+      res.send(service)
     })
 
   }
