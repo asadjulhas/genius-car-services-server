@@ -5,7 +5,7 @@ const { MongoClient, ServerApiVersion } = require('mongodb')
 ;
 const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
@@ -18,6 +18,13 @@ async function run() {
   try {
     await client.connect();
     const geniusCarCollection = client.db("geniusCar").collection("services");
+
+    // Add service
+    app.post('/service', async (req, res) => {
+      const service = req.body;
+      const results = await geniusCarCollection.insertOne(service);
+      res.send(results)
+    })
 
     // Get all services
     app.get('/services', async (req, res) => {
@@ -32,8 +39,17 @@ async function run() {
       const id = req.params.id;
       const query = {_id: ObjectId(id)}
       const service = await geniusCarCollection.findOne(query);
-      console.log(service);
       res.send(service)
+    })
+
+    // Delete a service
+    app.delete('/delete/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const result = geniusCarCollection.deleteOne(query);
+      // res.send(result.deletedCount)
+      console.log(result);
+      
     })
 
   }
@@ -45,7 +61,7 @@ async function run() {
 run().catch(console.dir)
 
 app.get('/', (req, res) =>{
-  res.send('Hello genius-car-services')
+  res.send('Hello genius-car-services Server')
 })
 
 app.listen(port, () => {
