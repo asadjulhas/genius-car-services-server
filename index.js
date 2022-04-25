@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb')
 ;
+const { query } = require('express');
 const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -56,6 +57,15 @@ async function run() {
       const order = req.body;
       const result = await orderCollection.insertOne(order)
       res.send(result)
+    })
+
+    // Get order list by user
+    app.get('/order', async (req, res) => {
+      const email = req.query.email;
+      const query = {email: email};
+      const cursor = orderCollection.find(query);
+      const orders = await cursor.toArray();
+      res.send(orders)
     })
 
   }
