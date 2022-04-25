@@ -18,6 +18,7 @@ async function run() {
   try {
     await client.connect();
     const geniusCarCollection = client.db("geniusCar").collection("services");
+    const orderCollection = client.db('geniusCar').collection('order');
 
     // Add service
     app.post('/service', async (req, res) => {
@@ -48,8 +49,13 @@ async function run() {
       const query = {_id: ObjectId(id)};
       const result = geniusCarCollection.deleteOne(query);
       res.send(result)
-      console.log(result);
-      
+    })
+
+    // Store order
+    app.post('/order', async (req, res) => {
+      const order = req.body;
+      const result = await orderCollection.insertOne(order)
+      res.send(result)
     })
 
   }
