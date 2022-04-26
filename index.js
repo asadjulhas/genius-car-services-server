@@ -13,6 +13,22 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json())
 
+function verifyJWT(req, res, next) {
+  const AccessToken = req.headers.authorization;
+  if(!AccessToken){
+    return res.status(401).send({Message: 'unauthorized access'})
+  }
+  const token = AccessToken.split(' ')[1];
+  jwt.verify(token, process.env.JWT_SECRETE_KEY, (err, decoded) => {
+    if(err) {
+      return res.status(403).send({message: 'Forbidden'})
+    }
+    req.decoded = decoded;
+  }) 
+  // console.log('User sended token by new', token);
+  next();
+}
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.f89pm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
@@ -52,7 +68,7 @@ async function run() {
       const result = geniusCarCollection.deleteOne(query);
       res.send(result)
     })
-
+    
     // Store order
     app.post('/order', async (req, res) => {
       const order = req.body;
@@ -61,12 +77,18 @@ async function run() {
     })
 
     // Get order list by user
-    app.get('/order', async (req, res) => {
+    app.get('/order', verifyJWT, async (req, res) => {
+      const decodedEmail = req.decoded.email
       const email = req.query.email;
-      const query = {email: email};
+      console.log(decodedEmail, email)
+      if(decodedEmail === email) {
+        const query = {email: email};
       const cursor = orderCollection.find(query);
       const orders = await cursor.toArray();
       res.send(orders)
+      } else {
+        res.status(403).send({message: 'forbidden access'})
+      }
     })
 
     // Create JWT for user
