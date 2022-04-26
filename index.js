@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+var jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion } = require('mongodb')
 ;
 const { query } = require('express');
@@ -66,6 +67,15 @@ async function run() {
       const cursor = orderCollection.find(query);
       const orders = await cursor.toArray();
       res.send(orders)
+    })
+
+    // Create JWT for user
+    app.post('/login', async (req, res) => {
+      const user = req.body;
+      const accessToken = jwt.sign(user, process.env.JWT_SECRETE_KEY, {
+        expiresIn: '1d'
+      })
+  res.send({accessToken})
     })
 
   }
