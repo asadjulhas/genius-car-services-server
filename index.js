@@ -80,7 +80,7 @@ async function run() {
     app.get('/order', verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email
       const email = req.query.email;
-      console.log(decodedEmail, email)
+      // console.log(decodedEmail, email)
       if(decodedEmail === email) {
         const query = {email: email};
       const cursor = orderCollection.find(query);
@@ -98,6 +98,10 @@ async function run() {
         expiresIn: '1d'
       })
   res.send({accessToken})
+    })
+
+    app.get('/hero', (req, res) => {
+      res.send('Hero from Hero Alom')
     })
 
   }
