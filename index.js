@@ -104,6 +104,15 @@ async function run() {
       res.send('Hero from Hero Alom')
     })
 
+    app.post('/orderitem', async (req, res) => {
+      const keys = req.body;
+    const ids = keys.map(id => ObjectId(id));
+    const query = {_id: {$in: ids}}
+    const cursor = geniusCarCollection.find(query);
+    const products = await cursor.toArray();
+    res.send(products)
+    })
+
   }
   finally {
     // await client.close();
