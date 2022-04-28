@@ -13,6 +13,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json())
 
+// Veryfi token for get order
 function verifyJWT(req, res, next) {
   const AccessToken = req.headers.authorization;
   if(!AccessToken){
@@ -28,6 +29,20 @@ function verifyJWT(req, res, next) {
   }) 
   // console.log('User sended token by new', token);
 }
+
+function serviceVerify(req, res, next) {
+  const authToken = req.headers.token;
+  if(!authToken) {
+    return res.status(401).send({message: 'unauthorized access'})
+  }
+  jwt.verify(authToken, process.env.JWT_SECRETE_KEY, (error, decoded) => {
+    if(error) {
+      return res.status(403).send({message: 'Forbidden'})
+    }
+    next();
+  })
+}
+
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.f89pm.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
@@ -46,11 +61,12 @@ async function run() {
     })
 
     // Get all services
-    app.get('/services', async (req, res) => {
+    app.get('/services', serviceVerify, async (req, res) => {
+      const authToken = req.headers.token;
       const query = {};
       const cursor = geniusCarCollection.find(query);
       const services = await cursor.toArray();
-      res.send(services)
+      res.send(services);
     })
 
     // Get single services
